@@ -6,6 +6,11 @@ import losses
 # %%
 
 
+def uvT(u, v):
+    return np.array([u]).T @ np.array([v])
+# %%
+
+
 class NN:
     def __init__(self, *dims):
         assert len(dims) > 1, 'not enough dimensions'
@@ -36,36 +41,20 @@ class NN:
 
         # in delta rule:
         # https://en.wikipedia.org/wiki/Delta_rule
+        # deltawji = lr * (tj - yj) * g'(hj)*xi, hj = sum(xi*wji), g(hj) = yj
         yhat = self.forward(x)
         x = [1, *x]
 
-        dydw = self.activations[-1].dif(self.weights[-1] @ x) * x
-        dw = self.lr * self.loss.dif(yhat, y) * dydw
-        print(dw)
+        dydw = uvT(self.activations[-1].dif(self.weights[-1] @ x), x)
+        self.weights[-1] += self.lr * self.loss.dif(yhat, y) * dydw
 
 
 # %%
-nn = NN(2, 2)
+nn = NN(2, 1)
 
 # %%
 
-x = np.array([1, 5, 9, -2, 3, 0, 0, -2])
-nn.forward(x)
 
-# %%
-nn.loss(np.array([1, 3]), np.array([4, 2]))
-# %%
-x
-# %%
-
-# y = 3x1 + x2 - 2
-
-x1 = np.array([1, 2])
-y1 = np.array([3])
-
-x2 = np.array([2, 1])
-y2 = np.array([5])
-# %%
 def yf1(x): return -2 + 3 * x[0] + x[1]
 def yf2(x): return 1 + x[0] - x[1]
 
@@ -73,24 +62,9 @@ def yf2(x): return 1 + x[0] - x[1]
 # %%
 for i in range(100):
     x = np.random.randint(-10, 10, 2)
-    nn.backward(x, np.array(yf1(x), yf2(x)))
+    nn.backward(x, np.array(yf1(x)))
 
 print(nn.weights)
 
 # %%
 nn.weights
-# %%
-nn.forward([3, 6])
-# %%
-np.array([1, 2]) + np.array([2, 2])
-# %%
-x = np.random.randint(-10, 10, 2)
-# %%
-nn.backward(x, np.array([yf1(x), yf2(x)]))
-
-# %%
-x
-# %%
-np.array([yf1(x), yf2(x)])
-
-# %%
