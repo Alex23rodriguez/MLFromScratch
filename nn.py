@@ -45,12 +45,15 @@ class NN:
         yhat = self.forward(x)
         x = [1, *x]
 
-        dydw = uvT(self.activations[-1].dif(self.weights[-1] @ x), x)
-        self.weights[-1] += self.lr * self.loss.dif(yhat, y) * dydw
+        h = self.weights[-1] @ x
+        g = self.activations[-1].dif(h)
+
+        deltaW = self.lr * uvT(self.loss.dif(yhat, y) * g, x)
+        self.weights[-1] += deltaW
 
 
 # %%
-nn = NN(2, 1)
+nn = NN(2, 2)
 
 # %%
 
@@ -62,9 +65,11 @@ def yf2(x): return 1 + x[0] - x[1]
 # %%
 for i in range(100):
     x = np.random.randint(-10, 10, 2)
-    nn.backward(x, np.array(yf1(x)))
+    nn.backward(x, np.array([yf1(x), yf2(x)]))
 
 print(nn.weights)
 
 # %%
 nn.weights
+
+# %%
