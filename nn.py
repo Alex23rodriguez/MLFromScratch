@@ -15,7 +15,7 @@ class NN:
     def __init__(self, *dims):
         assert len(dims) > 1, 'not enough dimensions'
         self.dims = list(dims)
-        self.dims[0] += 1
+        # self.dims[0] += 1
         self.weights = []
         self.lr = 0.01
 
@@ -24,11 +24,11 @@ class NN:
         self.loss = losses.MSE
 
         for n, m in zip(self.dims, self.dims[1:]):
-            self.weights.append(np.random.random([m, n]) * 2 - 1)
+            self.weights.append(np.random.random([m, n + 1]) * 2 - 1)
 
     def forward(self, x):
-        x = [1, *x]
         for i, W in enumerate(self.weights):
+            x = [1, *x]
             x = self.activations[i](W @ x)
         return x
 
@@ -53,7 +53,7 @@ class NN:
 
 
 # %%
-nn = NN(2, 2)
+nn = NN(2, 1, 3)
 
 # %%
 
@@ -72,4 +72,11 @@ print(nn.weights)
 # %%
 nn.weights
 
+# %%
+nn.weights
+
+# %%
+nn.forward([0, 0])
+# %%
+nn.activations
 # %%
