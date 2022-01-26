@@ -6,7 +6,7 @@ def relu(x):
     return np.max([x, np.zeros(len(x))], axis=0)
 
 
-relu.dif = lambda x: np.int(x > 0)
+relu.dif = lambda x: np.array(x > 0, dtype=int)
 
 
 def tanh(x):
