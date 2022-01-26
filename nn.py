@@ -1,4 +1,5 @@
 # %%mbda x: int(x > 0)
+from random import choice, randint
 import numpy as np
 import activation as ac
 import losses
@@ -19,7 +20,7 @@ class NN:
         self.weights = []
         self.lr = 0.01
 
-        self.activ = [ac.relu for _ in range(len(dims) - 2)] + [ac.iden]
+        self.activ = [ac.tanh for _ in range(len(dims) - 2)] + [ac.iden]
 
         self.loss = losses.MSE
 
@@ -114,16 +115,91 @@ nn.forward(x, True)
 # %%
 nn.backprop(x, y)
 nn.weights
-# %% #####
+# %% ##### Testing network with no hidden layers
 
 
 def yf1(x): return -2 + 3 * x[0] + x[1]
 def yf2(x): return 1 + x[0] - x[1]
 
 
+nn = NN(2, 2)
+
 # %%
 for i in range(100):
     x = np.random.randint(-10, 10, 2)
-    nn.backward(x, np.array([yf1(x), yf2(x)]))
+    nn.backprop(x, np.array([yf1(x), yf2(x)]))
 
 print(nn.weights)
+
+# %%
+# testing a network to recognize a 2x2 pic, based on backprop_test.png
+
+
+def generate_data():
+    y = randint(0, 3)
+    if y == 0:  # solid
+        x = choice([[-1, -1, -1, -1], [1, 1, 1, 1]])
+        return x, [1, 0, 0, 0]
+    if y == 1:  # vertical
+        x = choice([[-1, 1, -1, 1], [1, -1, 1, -1]])
+        return x, [0, 1, 0, 0]
+    if y == 2:  # diagonal
+        x = choice([[-1, 1, 1, -1], [1, -1, -1, 1]])
+        return x, [0, 0, 1, 0]
+    # horizontal
+    x = choice([[-1, -1, 1, 1], [1, 1, -1, -1]])
+    return x, [0, 0, 0, 1]
+
+
+# %%
+nn = NN(4, 4, 4, 8, 4)
+nn.set_activation(2, ac.relu)
+
+# %%
+for i in range(10000):
+    x, y = generate_data()
+    nn.backprop(x, y)
+
+print('solid', nn.forward(choice([[-1, -1, -1, -1], [1, 1, 1, 1]])))
+print('vertical', nn.forward(choice([[-1, 1, -1, 1], [1, -1, 1, -1]])))
+print('diagonal', nn.forward(choice([[-1, 1, 1, -1], [1, -1, -1, 1]])))
+print('horizontal', nn.forward(choice([[-1, -1, 1, 1], [1, 1, -1, -1]])))
+
+# %%
+generate_data()
+# %%
+nn.weights = [
+    np.array([
+        0, 1, 0, 1, 0,
+        0, 0, 1, 0, 1,
+        0, 1, 0, -1, 0,
+        0, 0, 1, 0, -1]).reshape(4, 5),
+    np.array([
+        0, 1, 1, 0, 0,
+        0, -1, 1, 0, 0,
+        0, 0, 0, 1, -1,
+        0, 0, 0, 1, 1]).reshape(4, 5),
+    np.array([
+        0, 1, 0, 0, 0,
+        0, -1, 0, 0, 0,
+        0, 0, 1, 0, 0,
+        0, 0, -1, 0, 0,
+        0, 0, 0, 1, 0,
+        0, 0, 0, -1, 0,
+        0, 0, 0, 0, 1,
+        0, 0, 0, 0, -1]).reshape(8, 5),
+    np.array([
+        0, 1, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 1, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 1]).reshape(4, 9)
+]
+# %%
+nn.weights
+# %%
+print('solid', nn.forward(choice([[-1, -1, -1, -1], [1, 1, 1, 1]])))
+print('vertical', nn.forward(choice([[-1, 1, -1, 1], [1, -1, 1, -1]])))
+print('diagonal', nn.forward(choice([[-1, 1, 1, -1], [1, -1, -1, 1]])))
+print('horizontal', nn.forward(choice([[-1, -1, 1, 1], [1, 1, -1, -1]])))
+
+# %%
